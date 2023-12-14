@@ -1,0 +1,4 @@
+apiVersion: v1
+name: flamenco
+description: Flamenco manager-client setup
+version: 0.1.0

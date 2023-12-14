@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flamenco-user
+  namespace: default
+  annotations:
+    iam.gke.io/gcp-service-account: flamenco-user@flamenco-experiment.iam.gserviceaccount.com

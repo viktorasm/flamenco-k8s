@@ -1,0 +1,6 @@
+.terraform
+kubeconfig*
+/deployment/images/manager/flamenco-manager
+/deployment/images/ubuntu-blender/blender-4.0.2-linux-x64.tar.xz
+/deployment/images/worker/bin/flamenco-worker
+/bin/*

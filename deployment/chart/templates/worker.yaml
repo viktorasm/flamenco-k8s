@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flamenco-worker-deployment
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+  replicas: 4
+  selector:
+    matchLabels:
+      app: flamenco-worker
+  template:
+    metadata:
+      labels:
+        app: flamenco-worker
+      annotations:
+        gke-gcsfuse/volumes: "true"
+    spec:
+      serviceAccountName: flamenco-user
+      containers:
+      - name: flamenco-worker
+        image: europe-central2-docker.pkg.dev/flamenco-experiment/flamenco/flamenco-worker:0.2
+        env:
+        - name: MANAGER_LOCATION
+          value: flamenco-manager-service
+        resources:
+          requests:
+            cpu: "2"
+            # memory: will be matched to limits
+          limits:
+            memory: "2Gi"
+            # cpu: use all available spare juice on the node
+        volumeMounts:  # Add this section to mount volumes
+        - name: assets-repo
+          mountPath: /assets
+      volumes:
+        - name: assets-repo
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: true
+            volumeAttributes:
+              bucketName: flamenco-assets-repo
+              mountOptions: "implicit-dirs"

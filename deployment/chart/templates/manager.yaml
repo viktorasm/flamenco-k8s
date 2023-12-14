@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flamenco-manager-deployment
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flamenco-manager
+  template:
+    metadata:
+      labels:
+        app: flamenco-manager
+      annotations:
+        gke-gcsfuse/volumes: "true"
+    spec:
+      serviceAccountName: flamenco-user
+      containers:
+      - name: flamenco-manager
+        image: europe-central2-docker.pkg.dev/flamenco-experiment/flamenco/flamenco-manager:0.3
+        ports:
+        - name: http
+          containerPort: 8080
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        volumeMounts:  # Add this section to mount volumes
+        - name: assets-repo
+          mountPath: /assets
+        - name: config
+          mountPath: /server/flamenco-manager.yaml
+          subPath: flamenco-manager.yaml
+      volumes:
+        - name: assets-repo
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: true
+            volumeAttributes:
+              bucketName: flamenco-assets-repo
+              mountOptions: "implicit-dirs"
+        - name: config
+          configMap:
+            name: flamenco-manager-config
+            items:
+              - key: flamenco-manager.yaml
+                path: flamenco-manager.yaml
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flamenco-manager-service
+spec:
+  selector:
+    app: flamenco-manager
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flamenco-manager-config
+data:
+  flamenco-manager.yaml: |-
+    # Configuration file for Flamenco.
+    # For an explanation of the fields, refer to flamenco-manager-example.yaml
+    #
+    # NOTE: this file will be overwritten by Flamenco Manager's web-based configuration system.
+    #
+    # This file was written on 2023-12-13 19:20:20 +02:00 by Flamenco 3.3
+
+    _meta:
+      version: 3
+    manager_name: Flamenco
+    database: flamenco-manager.sqlite
+    database_check_period: 1h0m0s
+    listen: :8080
+    autodiscoverable: true
+    local_manager_storage_path: ./flamenco-manager-storage
+    shared_storage_path: /assets
+    shaman:
+      enabled: true
+      garbageCollect:
+        period: 24h0m0s
+        maxAge: 744h0m0s
+        extraCheckoutPaths: []
+    task_timeout: 10m0s
+    worker_timeout: 1m0s
+    blocklist_threshold: 3
+    task_fail_after_softfail_count: 3
+    variables:
+      blender:
+        values:
+        - platform: linux
+          value: /apps/blender-4.0.2-linux-x64/blender
+        - platform: windows
+          value: /apps/blender-4.0.2-linux-x64/blender
+        - platform: darwin
+          value: /apps/blender-4.0.2-linux-x64/blender
+      blenderArgs:
+        values:
+        - platform: all
+          value: -b -y
+
+
