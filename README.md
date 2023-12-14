@@ -10,6 +10,11 @@
 
 ## TODO:
 
+* manager: do not run on spot. create small machine just for manager.
+* worker memory: different jobs require different memory, might need a more dynamic way to set this.
+
+* worker: if manager is unreachable, just die.
+  * maybe possible via health probe?
 * setup autoscaling! main goal of this exercise
 * include ffmpeg
   

@@ -7,7 +7,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 100%
-  replicas: 1
+  replicas: 20
   selector:
     matchLabels:
       app: flamenco-worker
@@ -27,10 +27,10 @@ spec:
           value: flamenco-manager-service
         resources:
           requests:
-            cpu: "2"
+            cpu: "7" # fit two pods per 16 cpu node
             # memory: will be matched to limits
           limits:
-            memory: "15Gi"
+            memory: "25Gi" # just share 64gb node in half
             # cpu: use all available spare juice on the node
         volumeMounts:  # Add this section to mount volumes
         - name: assets-repo
