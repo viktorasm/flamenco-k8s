@@ -14,11 +14,11 @@ curl -v -X 'POST' \
   "settings": {
     "add_path_components": 0,
     "blender_cmd": "{blender}",
-    "blendfile": "/assets/cube.blend",
+    "blendfile": "/assets/blender-3.5-splash.blend",
     "chunk_size": 3,
     "format": "PNG",
     "fps": 24,
-    "frames": "1-60",
+    "frames": "1-200",
     "image_file_extension": ".png",
     "images_or_video": "images",
     "render_output_path": "/tmp/flamenco/Demo for Peoples/######",

@@ -1,6 +1,11 @@
 # Taskfile.yml
 version: '3'
 
+
+env:
+  KUBECONFIG: "{{.TASKFILE_DIR}}/deployment/infrastructure/kubeconfig"
+
+
 tasks:
   build-blender-container:
     desc: "build blender container"
@@ -18,39 +23,28 @@ tasks:
     cmds:
       - echo "make sure network exists with  'docker network create test-network'"
       - docker build . -t flamenco-worker
-  run-manager:
-    desc: "test flamenco container with a sample config"
-    dir: deployment/images/manager
+
+  tf-apply:
+    desc: "terraform apply with auto-approve"
+    dir: deployment/infrastructure
     cmds:
-      - docker stop my-flamenco-manager-instance || true
-      - >
-        docker run --rm -p 8090:8080
-        --network test-network
-        -v ./flamenco-manager.yaml:/server/flamenco-manager.yaml
-        -v ./flamenco-manager.sqlite:/server/flamenco-manager.sqlite
-        -v ./sample-repository:/repo/
-        -d --name my-flamenco-manager-instance flamenco-manager
-    silent: true
-  run-worker:
-    desc: "test flamenco container with a sample config"
-    dir: deployment/images/worker
+      - terraform apply -auto-approve
+  tf-destroy:
+    desc: "terraform - destroy all cloud resources"
+    dir: deployment/infrastructure
     cmds:
-      - docker stop flamenco-worker-instance || true
-      - >
-        docker run --rm -it
-        --network test-network
-        -e MANAGER_LOCATION=my-flamenco-manager-instance:8080
-        -d --name flamenco-worker-instance flamenco-worker
-      - sleep 2
-      - docker container logs flamenco-worker-instance --tail all
-    silent: true
+      - terraform destroy
+  helm-upgrade:
+    desc: "redeploy helm chart local changes"
+    dir: deployment/chart
+    cmds:
+      - helm upgrade flamenco .
   debug-job:
     desc: "sends debug job"
     dir: scripts
     cmds:
       - ./debug-job-render.sh
     silent: true
-
   stop-all:
     cmds:
       - docker stop my-flamenco-manager-instance
