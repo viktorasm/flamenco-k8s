@@ -1,10 +1,7 @@
-# Taskfile.yml
 version: '3'
-
 
 env:
   KUBECONFIG: "{{.TASKFILE_DIR}}/deployment/infrastructure/kubeconfig"
-
 
 tasks:
   build-blender-container:
@@ -12,11 +9,13 @@ tasks:
     dir: deployment/images/ubuntu-blender
     cmds:
       - docker build . -t flamenco-blender-base
+
   build-manager:
     desc: "build manager container"
     dir: deployment/images/manager
     cmds:
       - docker build . -t flamenco-manager
+
   build-worker:
     desc: "build worker container"
     dir: deployment/images/worker
@@ -29,28 +28,30 @@ tasks:
     dir: deployment/infrastructure
     cmds:
       - terraform apply -auto-approve
+
   tf-destroy:
     desc: "terraform - destroy all cloud resources"
     dir: deployment/infrastructure
     cmds:
       - terraform destroy
+
   proxy:
     desc: "port-forward to the manager. cheaper than hosting a load balancer."
     cmds:
       - kubectl port-forward $(kubectl get pods -l app=flamenco-manager -o jsonpath="{.items[0].metadata.name}") 8080:8080
-
-# Set up port forwarding to the first pod
 
   workers-many:
     desc: "scale to more workers"
     dir: deployment/infrastructure
     cmds:
       - kubectl scale deployments/flamenco-worker-deployment --replicas=20
+
   workers-one:
     desc: "scale to single worker"
     dir: deployment/infrastructure
     cmds:
       - kubectl scale deployments/flamenco-worker-deployment --replicas=1
+
   workers-status:
     desc: "check worker status"
     dir: deployment/infrastructure
@@ -62,14 +63,10 @@ tasks:
     dir: deployment/chart
     cmds:
       - helm upgrade flamenco .
+
   debug-job:
     desc: "sends debug job"
     dir: scripts
     cmds:
       - ./debug-job-render.sh
-    silent: true
-  stop-all:
-    cmds:
-      - docker stop my-flamenco-manager-instance
-      - docker stop flamenco-worker-instance
     silent: true
