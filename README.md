@@ -67,8 +67,9 @@ This is a very crude experiment, making this public just to share with a few peo
 
 * setup automatic worker autoscaling based on incoming work. might need manager tweaks for this
   * HPA on workers might be too indirect
+  * explore custom KEDA scaler option
   * explore custom operator option
-* 
+
 * IAC: automate SA creation
 * IAC: automate bucket creation
 * IAC: with terraform destroy, we'll drop bucket & service account, which probably stick around
