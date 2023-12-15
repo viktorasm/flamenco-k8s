@@ -63,17 +63,21 @@ This is a very crude experiment, making this public just to share with a few peo
 
 ## TODO:
 
-* manager: do not run on spot. create small machine just for manager.
-* worker memory: different jobs require different memory, might need a more dynamic way to set this.
+* helm charts: review for hardcoded settings, like bucket name
 
-* worker: if manager is unreachable, just die.
-  * maybe possible via health probe?
-* setup autoscaling! main goal of this exercise
-* include ffmpeg
-  
+* setup automatic worker autoscaling based on incoming work. might need manager tweaks for this
+  * HPA on workers might be too indirect
+  * explore custom operator option
+* 
 * IAC: automate SA creation
 * IAC: automate bucket creation
-* helm charts: review for hardcoded settings, like bucket name
+* IAC: with terraform destroy, we'll drop bucket & service account, which probably stick around
+
+* manager: do not run on spot. create small machine just for manager.
+* worker memory: different jobs require different memory, might need a more dynamic way to set this.
+* worker: if manager is unreachable, just die.
+  * maybe possible via health probe?
+* include ffmpeg
 * script to reapply helm
 * script to download Docker dependencies (blender, flamenco)
 
