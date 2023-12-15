@@ -72,7 +72,7 @@ In its current form, this is not a comprehensive checklist or an end-user guide,
 * Access the manager and submit a render job from the main directory:
   * Run `task` to list all available tasks.
   * Use `task proxy` to open a proxy to the manager and inspect the setup.
-  * Execute `task workers-many` to scale up to more workers. This should trigger autoscaling of the infrastructure. Monitor the process in the GCP console and adjust settings as needed.
+  * Execute `task workers-many` to scale up to more workers. This should trigger autoscaling of the infrastructure. Monitor the process in the GCP console and fix issues with more knobs and buttons.
   * Use `task debug-job` to submit a job to the manager. Ensure the proxy is running in another terminal.
 * Destroy infrastructure:
    * After usage, dismantle everything using `task tf-destroy`. If this fails, for example, due to loss of your Terraform state, manually delete the entire project in the GCP console.
