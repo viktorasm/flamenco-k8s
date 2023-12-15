@@ -22,27 +22,28 @@ Probably mumbo-jumbo to 3d folks, but listing the main idea anyway:
 * User uploads scenes to GCS bucket, and runs a local http proxy to reach manager on the cloud to view status.
 
 ```mermaid
-graph LR
-    subgraph Kubernetes Cluster
-        subgraph GKE [Google Kubernetes Engine]
-            WorkerNodes[Worker Nodes (Spot Instances)]
-        end
-        subgraph Docker Containers
+graph TB
+    subgraph k8s["Kubernetes Cluster (GKE)"]
+        subgraph spotInstances["Spot instances"]
             FlamencoWorker[Flamenco Worker]
             FlamencoManager[Flamenco Manager]
             Blender[Blender]
         end
     end
-
-    GCSBucket[GCS Bucket (Cloud Storage)]
+    GCSBucket[GCS : assets storage]
     User[User]
-    HTTPProxy[Local HTTP Proxy]
-
+    KubectlProxy[Command-line proxy]
+    TF[Terraform]
     User -- Uploads scenes --> GCSBucket
-    GCSBucket -- Mount as Volume --> DockerContainers
-    HTTPProxy -- Reach Manager --> FlamencoManager
-    FlamencoManager -- Manage Work --> FlamencoWorker
-    FlamencoWorker -- Process Scenes --> Blender
+    User -- View manager console --> KubectlProxy 
+    User -- Provision and destroy the whole setup -->TF
+    TF -- Create/Destroy -->k8s
+    KubectlProxy --> FlamencoManager
+    User -- Manually scale workers --> FlamencoWorker
+    FlamencoWorker -- Mount as Volume --> GCSBucket
+    FlamencoManager -- Distribute Jobs --> FlamencoWorker
+    Kubernetes -- trigger additional nodes to fit workers --> spotInstances
+    FlamencoWorker -- run --> Blender
     Blender -- Access Scenes --> GCSBucket
 ```
 
