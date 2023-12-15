@@ -66,7 +66,7 @@ In its current form, this is not a comprehensive checklist or an end-user guide,
   * Navigate to `deployment/infrastructure`.
   * Configure `terraform.tfvars` with your project_id and any optional overrides for new infrastructure.
   * Run `terraform init` and `terraform apply`.
-  * Adjust settings in the GCP console as necessary.
+  * Twist and push various knobs and buttons in the GCP console until everything works properly.
 * Upload your Blender files to the assets repository via GCP console or `gsutil`
   * Access the [GCS Storage Browser](https://console.cloud.google.com/storage/browser/YOUR-BUCKET-NAME).
 * Access the manager and submit a render job from the main directory:
