@@ -1,25 +1,25 @@
 ## About
 
-This is a cloud configuration to run https://flamenco.blender.org/ with as many compute power as you can buy, as opposed to owning physical computers.
+This configuration enables running [Flamenco](https://flamenco.blender.org/) in the cloud, leveraging as much computing power as you can afford, instead of relying on physical computers.
 
-The theoretical goals would be:
-* When time is of the essence, you'd prefer to just have a very big render farm for short period of time;
-* Use cheapest compute power there is in the cloud - spot instances. 
-* When no jobs are running, just scale down and don't pay a dime.
+The theoretical goals include:
+* Having a large render farm at your disposal for a short period when time is critical.
+* Utilizing the most affordable compute power available in the cloud, specifically spot instances.
+* Scaling down to zero cost when there are no active jobs.
 
-Of course, there are many cloud-based render services, but prices are outrageous - let's see if on-demand provisioning and cheap throaway setup can do better.
-
+Although numerous cloud-based render services exist, they often come with exorbitant fees. This project aims to explore whether on-demand provisioning and an economical, disposable setup can offer a more cost-effective solution.
 
 ### Architecture
 
-Probably mumbo-jumbo to 3d folks, but listing the main idea anyway:
+This might be too much technical jargon to those not familiar with clouds&infrastructure, but here is the main concept:
 
-* Create docker containers for flamenco-worker and flamenco-manager; bundle blender together with docker.
-* Containers running in Kubernetes (chose Google GKE as google cloud provides best per-project isolation, easy to teardown)
-* All worker nodes in Kubernetes configured as spots
-* Blender scenes are stored in GCS (cloud storage) bucket; containers mount that as file system volume.
-* using GCS (cloud storage) bucket for transfering scenes
-* User uploads scenes to GCS bucket, and runs a local http proxy to reach manager on the cloud to view status.
+* Flamenco Worker and Flamenco Manager are packaged as Docker containers, bundled with Blender as well.
+* Containers are executed in Kubernetes; this project setup uses Google's GKE for its superior per-project isolation and straightforward teardown process.
+* Use spot instances for maximum cost savings.
+* Use CPU rendering for simplicity of this proof-of-concept. GPU rendering not explored yet, but definitely a possibility, but comes with significant overhead for containers and cost/benefit ratio is unclear;
+* Assets (e.g. Blender scenes) are uploaded and stored in a GCS (Google Cloud Storage) bucket, with containers mounting it as a filesystem volume.
+* Users use a local HTTP proxy to communicate with the manager in the cloud.
+
 
 ```mermaid
 graph TB
@@ -53,36 +53,33 @@ This is a very crude experiment, making this public just to share with a few peo
 
 ## Usage
 
-In it's current form, this is not a comprehensive checklist or an end-user journey, but more of an idea to test the setup.
+In its current form, this is not a comprehensive checklist or an end-user guide, but rather an outline to test the setup.
 
-* Create new GCP project
-  * https://console.cloud.google.com/
-  * Might need to boost quota for "n2d CPUs" right away, defaults are way to small for bursty workloads.
-  * Configure credit card etc.
+* Create a new GCP project
+  * Start by visiting [Google Cloud Console](https://console.cloud.google.com/)
+  * You may need to increase the quota for "n2d CPUs" immediately, as the default limits are too low for bursty workloads.
+  * Set up payment.
 * Install prerequisites
-  * https://taskfile.dev/ to use Taskfile targets 
-  * Gcloud
-  * Terraform
-  * Helm
-  * kubectl
+  * [Taskfile](https://taskfile.dev/) to utilize Taskfile targets.
+  * Install Gcloud, Terraform, Helm, and kubectl.
 * Deploy infrastructure
-  * go to `deployment/infrastructure`
-  * configure `terraform.tfvars` with project_id, and optional overrides for new infrastructure
-  * `terraform init`
-  * `terraform apply`
-  * twist and push various knobs and buttons in GCP console until everything.
-* Upload your blend files to assets repo via GCP console or `gsutil`
-  * https://console.cloud.google.com/storage/browser/YOUR-BUCKET-NAME
-* Access the manager and submit a render job - from main dir:
-  * `task`: list all available tasks
-  * `tak proxy`: open proxy to manager and inspect the setup
-  *  `task workers-many`: scale to more workers. should trigger autoscaling of infrastructure, observe the process in GCP console and fix issues with more knobs and buttons;
-  * `task debug-job`: submit a job to manager; proxy should be running in another terminal.
- * Destroy infrastructure:
-   * Once you're done using things, destroy everything with `task tf-destroy`. If that fails, e.g. you lose your TF state or something - drop the whole project manually in GCP console.
+  * Navigate to `deployment/infrastructure`.
+  * Configure `terraform.tfvars` with your project_id and any optional overrides for new infrastructure.
+  * Run `terraform init` and `terraform apply`.
+  * Twist and push various knobs and buttons in the GCP console until everything works properly.
+* Upload your Blender files to the assets repository via GCP console or `gsutil`
+  * Access the [GCS Storage Browser](https://console.cloud.google.com/storage/browser/YOUR-BUCKET-NAME).
+* Access the manager and submit a render job from the main directory:
+  * Run `task` to list all available tasks.
+  * Use `task proxy` to open a proxy to the manager and inspect the setup.
+  * Execute `task workers-many` to scale up to more workers. This should trigger autoscaling of the infrastructure. Monitor the process in the GCP console and fix issues with more knobs and buttons.
+  * Use `task debug-job` to submit a job to the manager. Ensure the proxy is running in another terminal.
+* Destroy infrastructure:
+   * After usage, dismantle everything using `task tf-destroy`. If this fails, for example, due to loss of your Terraform state, manually delete the entire project in the GCP console.
 
 
-## Notes
+
+## Assorted Notes
 
 * manager can't run without detecting blender installation: should probably not care about it
 * file-based configuration not as comfortable for some settings like configuring `shared_storage_path`: would be much easier to just feed into container as env var.
@@ -112,7 +109,3 @@ In it's current form, this is not a comprehensive checklist or an end-user journ
 * include ffmpeg
 * script to reapply helm
 * script to download Docker dependencies (blender, flamenco)
-
-## Done:
-* initial infrastructure automation to provision/destroy everything
-* manager needs to start in ready-to-work setup without any introductory dialog.
