@@ -51,6 +51,37 @@ graph TB
 
 This is a very crude experiment, making this public just to share with a few people.
 
+## Usage
+
+In it's current form, this is not a comprehensive checklist or an end-user journey, but more of an idea to test the setup.
+
+* Create new GCP project
+  * https://console.cloud.google.com/
+  * Might need to boost quota for "n2d CPUs" right away, defaults are way to small for bursty workloads.
+  * Configure credit card etc.
+* Install prerequisites
+  * https://taskfile.dev/ to use Taskfile targets 
+  * Gcloud
+  * Terraform
+  * Helm
+  * kubectl
+* Deploy infrastructure
+  * go to `deployment/infrastructure`
+  * configure `terraform.tfvars` with project_id, and optional overrides for new infrastructure
+  * `terraform init`
+  * `terraform apply`
+  * twist and push various knobs and buttons in GCP console until everything.
+* Upload your blend files to assets repo via GCP console or `gsutil`
+  * https://console.cloud.google.com/storage/browser/YOUR-BUCKET-NAME
+* Access the manager and submit a render job - from main dir:
+  * `task`: list all available tasks
+  * `tak proxy`: open proxy to manager and inspect the setup
+  *  `task workers-many`: scale to more workers. should trigger autoscaling of infrastructure, observe the process in GCP console and fix issues with more knobs and buttons;
+  * `task debug-job`: submit a job to manager; proxy should be running in another terminal.
+ * Destroy infrastructure:
+   * Once you're done using things, destroy everything with `task tf-destroy`. If that fails, e.g. you lose your TF state or something - drop the whole project manually in GCP console.
+
+
 ## Notes
 
 * manager can't run without detecting blender installation: should probably not care about it
