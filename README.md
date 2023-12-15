@@ -1,25 +1,25 @@
 ## About
 
-This is a cloud configuration to run https://flamenco.blender.org/ with as many compute power as you can buy, as opposed to owning physical computers.
+This configuration enables running [Flamenco](https://flamenco.blender.org/) in the cloud, leveraging as much computing power as you can afford, instead of relying on physical computers.
 
-The theoretical goals would be:
-* When time is of the essence, you'd prefer to just have a very big render farm for short period of time;
-* Use cheapest compute power there is in the cloud - spot instances. 
-* When no jobs are running, just scale down and don't pay a dime.
+The theoretical goals include:
+* Having a large render farm at your disposal for a short period when time is critical.
+* Utilizing the most affordable compute power available in the cloud, specifically spot instances.
+* Scaling down to zero cost when there are no active jobs.
 
-Of course, there are many cloud-based render services, but prices are outrageous - let's see if on-demand provisioning and cheap throaway setup can do better.
-
+Although numerous cloud-based render services exist, they often come with exorbitant fees. This project aims to explore whether on-demand provisioning and an economical, disposable setup can offer a more cost-effective solution.
 
 ### Architecture
 
-Probably mumbo-jumbo to 3d folks, but listing the main idea anyway:
+This might be too much technical jargon to those not familiar with clouds&infrastructure, but here is the main concept:
 
-* Create docker containers for flamenco-worker and flamenco-manager; bundle blender together with docker.
-* Containers running in Kubernetes (chose Google GKE as google cloud provides best per-project isolation, easy to teardown)
-* All worker nodes in Kubernetes configured as spots
-* Blender scenes are stored in GCS (cloud storage) bucket; containers mount that as file system volume.
-* using GCS (cloud storage) bucket for transfering scenes
-* User uploads scenes to GCS bucket, and runs a local http proxy to reach manager on the cloud to view status.
+* Flamenco Worker and Flamenco Manager are packaged as Docker containers, bundled with Blender as well.
+* Containers are executed in Kubernetes; this project setup uses Google's GKE for its superior per-project isolation and straightforward teardown process.
+* Use spot instances for maximum cost savings.
+* Use CPU rendering for simplicity of this proof-of-concept. GPU rendering not explored yet, but definitely a possibility, but comes with significant overhead for containers and cost/benefit ratio is unclear;
+* Assets (e.g. Blender scenes) are uploaded and stored in a GCS (Google Cloud Storage) bucket, with containers mounting it as a filesystem volume.
+* Users use a local HTTP proxy to communicate with the manager in the cloud.
+
 
 ```mermaid
 graph TB
